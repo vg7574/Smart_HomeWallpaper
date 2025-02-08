@@ -22,6 +22,8 @@
         </receiver>
         <activity
             android:name=".MainActivity"
+            android:configChanges="screenSize"
+            android:screenOrientation="sensor"
             android:exported="true"
             android:label="Wiggly-Woggly-Wallpaper"
             android:theme="@style/Theme.AppCompat">

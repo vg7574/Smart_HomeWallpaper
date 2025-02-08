@@ -4,8 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -15,22 +13,15 @@ import android.widget.ToggleButton
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var timePicker: TimePicker
     private lateinit var toggleButton: ToggleButton
-    private lateinit var previewImage: ImageView
-
-    private var selectedDay: String = ""
-
-    // Register activity result launcher
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        uri?.let {
-            showImagePreviewDialog(it)
-        }
-    }
+    private lateinit var viewModel: MainViewModel  // ViewModel to retain data
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +29,12 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
+
         timePicker = findViewById(R.id.timePicker)
         toggleButton = findViewById(R.id.toggleButton)
-        // previewImage = findViewById(R.id.previewImage)
+
+        // Initialize ViewModel
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         val days = mapOf(
             "MONDAY" to R.id.mondayButton,
@@ -54,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
         days.forEach { (day, buttonId) ->
             findViewById<Button>(buttonId).setOnClickListener {
-                selectedDay = day
+                viewModel.selectedDay = day
                 pickImage()
             }
         }
@@ -66,43 +60,45 @@ class MainActivity : AppCompatActivity() {
                 cancelAlarm()
             }
         }
+
+        // Restore Image Preview After Rotation
+        viewModel.selectedImageUri?.let { showImagePreviewDialog(it) }
+    }
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            uri?.let {
+                viewModel.selectedImageUri = it  // Store image URI in ViewModel
+                showImagePreviewDialog(it)
+            }
+        }
     }
 
     private fun pickImage() {
-        pickImageLauncher.launch(arrayOf("image/*"))
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            type = "image/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        imagePickerLauncher.launch(intent)
     }
 
     private fun showImagePreviewDialog(imageUri: Uri) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_image_preview, null)
         val imageView = dialogView.findViewById<ImageView>(R.id.previewDialogImage)
 
-        val bitmap = getScaledBitmapForScreen(imageUri)
-        imageView.setImageBitmap(bitmap)
+        imageView.setImageURI(imageUri)
 
         AlertDialog.Builder(this)
             .setTitle("Preview Wallpaper")
             .setView(dialogView)
             .setPositiveButton("OK") { _, _ ->
-                // ✅ User confirms -> Save & Proceed
                 contentResolver.takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                saveWallpaperUri(selectedDay, imageUri.toString())
+                saveWallpaperUri(viewModel.selectedDay, imageUri.toString())
             }
-            .setNegativeButton("Cancel", null) // ❌ User cancels -> Do nothing
+            .setNegativeButton("Cancel", null)
             .show()
     }
-
-    private fun getScaledBitmapForScreen(imageUri: Uri): Bitmap {
-        val displayMetrics = resources.displayMetrics
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-
-        val inputStream = contentResolver.openInputStream(imageUri)
-        val originalBitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-
-        return Bitmap.createScaledBitmap(originalBitmap, screenWidth, screenHeight, true)
-    }
-
 
     private fun saveWallpaperUri(day: String, uri: String) {
         val prefs = getSharedPreferences("WALLPAPER_PREFS", Context.MODE_PRIVATE)
@@ -112,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     private fun setDailyWallpaperAlarm() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, timePicker.hour)
@@ -131,7 +127,13 @@ class MainActivity : AppCompatActivity() {
     private fun cancelAlarm() {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         alarmManager.cancel(pendingIntent)
     }
+}
+
+// ViewModel to retain data across screen rotations
+class MainViewModel : ViewModel() {
+    var selectedImageUri: Uri? = null
+    var selectedDay: String = ""
 }

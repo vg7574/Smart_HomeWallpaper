@@ -28,11 +28,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="New Wallpaper Everyday :-)"
+        android:text="Why settle for 1 wallpaper when you can have 'em all? 🔥📸"
         android:textAlignment="center"
 
         android:textColor="@color/purple_700"
-        android:textSize="22dp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,14 +43,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:gravity="center"
-        android:text="Choose One for Once !"
+        android:text="Set it and forget it—wallpapers that change like magic! 🪄📲"
         android:textAlignment="center"
         android:textColor="#662D8C"
-        android:textSize="22sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timeChoose" />
 
@@ -58,9 +59,7 @@
         android:id="@+id/daysScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,7 +70,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="3dp">
 
             <!-- Buttons for Days -->
 
@@ -145,14 +144,13 @@
         android:id="@+id/timePickerLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:gravity="center"
-        android:text="Set Alarm Time"
+        android:text="Set Time - Your screen, your mood🌈"
         android:textColor="#3d05dd"
-        android:textSize="20sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.559"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/daysScrollView" />
 
@@ -160,7 +158,7 @@
         android:id="@+id/timePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="4dp"
         android:backgroundTint="@color/teal_700"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -176,9 +174,10 @@
         android:textOff="Wallpaper  ON"
         android:textOn="Wallpaper  OFF"
         android:textStyle="bold"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.544"
+        app:layout_constraintHorizontal_bias="0.551"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/timePicker"
         app:layout_constraintVertical_bias="0.0" />
